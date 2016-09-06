@@ -1,0 +1,11 @@
+security:
+  basic:
+    enabled: false
+management:
+  security:
+    enabled: false
+endpoints:
+  refresh:
+    enabled: true
+  bus:
+    enabled: true

@@ -1,0 +1,51 @@
+CAUTION: Replace "yourname" to something you use in the below commands and codes.
+
+
+= Create service in PCF environment:
+
+== Setup your own private config server:
+----
+cf create-service p-service-registry standard eureka-service-yourname
+----
+
+CAUTION: The service require few minutes to start successfully
+
+
+= Add the following services to manifest.yml file:
+----
+    services:
+        - eureak-service-yourname
+
+----
+
+= Add the following dependencies to pom.xml
+[source,xml]
+----
+<dependencies>
+        <dependency>
+			<groupId>io.pivotal.spring.cloud</groupId>
+			<artifactId>spring-cloud-services-starter-service-registry</artifactId>
+		</dependency>
+</dependencies>
+----
+
+= Add the annotation of  @EnableDiscoveryClient to AtomicNumProducerApplication
+
+[source,java]
+----
+@SpringBootApplication
+///other annotation here
+@EnableDiscoveryClient //Add this one
+public class AtomicNumProducerApplication {
+
+ ////.........
+
+}
+
+----
+
+= Maven package and push to CF
+----
+mvn clean package
+cf push
+----
