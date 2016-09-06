@@ -1,34 +1,25 @@
 CAUTION: Replace "yourname" to something you use in the below commands and codes.
 
 
-Fork the configuration repo:
-~~~~~
-[source,shell]
+=Fork the configuration repo:
 ----
 Click the "Fork" button on the URL of https://github.com/hinyinlam-pivotal/cna-configrepo
 ----
 
 
-Create service in PCF environment:
-~~~~~~~
+=Create service in PCF environment:
 
-Setup your own private config server:
-^^^^^^^
-[source,shell]
+==Setup your own private config server:
 ----
 cf create-service p-config-server  standard config-service-yourname -c '{"git": { "uri": "https://github.com/your-github-name-here/cna-configrepo" } }'
 ----
 
-Setup message bus for your app to receive refresh request:
-^^^^^^^
-[source,shell]
+==Setup message bus for your app to receive refresh request:
 ----
 cf create-service p-rabbitmq standard cloud-config-bus-yourname
 ----
 
-Add the following services to manifest.yml file:
-~~~~~~~
-[source,yml]
+=Add the following services to manifest.yml file:
 ----
     services:
         - cloud-config-bus-yourname #For Spring Cloud Config
@@ -36,9 +27,7 @@ Add the following services to manifest.yml file:
 
 ----
 
-Add the following dependencies to pom.xml
-~~~~~~~
-[source,xml]
+=Add the following dependencies to pom.xml
 ----
 <dependencies>
 <!--Begin For CloudConfig -->
@@ -58,11 +47,9 @@ Add the following dependencies to pom.xml
 </dependencies>
 ----
 
-Add the annotation of @RefreshScope to Greeting.java
-~~~~~~~
+=Add the annotation of @RefreshScope to Greeting.java
 This Java class is a bean that Spring will re-created when your refresh the config again from the Git repo.
 
-[source,java]
 ----
 @RefreshScope  //This annotation
 @Component
@@ -73,11 +60,9 @@ class Greeting{
 }
 ----
 
-Enable these endpoint in security settings in main/resources/application.yml :
+=Enable these endpoint in security settings in main/resources/application.yml :
 CAUTION: This is sure not a best settings but works for our demo
-~~~~~~~
 
-[source,yml]
 ----
 management:
   security:
@@ -89,9 +74,7 @@ endpoints:
     enabled: true
 ----
 
-Maven package and push to CF
-~~~~~~~
-[source,shell]
+=Maven package and push to CF
 ----
 cf push
 ----
