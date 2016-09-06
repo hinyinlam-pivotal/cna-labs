@@ -1,0 +1,97 @@
+CAUTION: Replace "yourname" to something you use in the below commands and codes.
+
+
+Fork the configuration repo:
+~~~~~
+[source,shell]
+----
+Click the "Fork" button on the URL of https://github.com/hinyinlam-pivotal/cna-configrepo
+----
+
+
+Create service in PCF environment:
+~~~~~~~
+
+Setup your own private config server:
+^^^^^^^
+[source,shell]
+----
+cf create-service p-config-server  standard config-service-yourname -c '{"git": { "uri": "https://github.com/your-github-name-here/cna-configrepo" } }'
+----
+
+Setup message bus for your app to receive refresh request:
+^^^^^^^
+[source,shell]
+----
+cf create-service p-rabbitmq standard cloud-config-bus-yourname
+----
+
+Add the following services to manifest.yml file:
+~~~~~~~
+[source,yml]
+----
+    services:
+        - cloud-config-bus-yourname #For Spring Cloud Config
+        - config-service-yourname   #For Spring Cloud Config
+
+----
+
+Add the following dependencies to pom.xml
+~~~~~~~
+[source,xml]
+----
+<dependencies>
+<!--Begin For CloudConfig -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bus-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cloud-connectors</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.pivotal.spring.cloud</groupId>
+			<artifactId>spring-cloud-services-starter-config-client</artifactId>
+		</dependency>
+<!--End CloudConfig -->
+</dependencies>
+----
+
+Add the annotation of @RefreshScope to Greeting.java
+~~~~~~~
+This Java class is a bean that Spring will re-created when your refresh the config again from the Git repo.
+
+[source,java]
+----
+@RefreshScope  //This annotation
+@Component
+class Greeting{
+
+  //.....
+
+}
+----
+
+Enable these endpoint in security settings in main/resources/application.yml :
+CAUTION: This is sure not a best settings but works for our demo
+~~~~~~~
+
+[source,yml]
+----
+management:
+  security:
+    enabled: false
+endpoints:
+  refresh:
+    enabled: true
+  bus:
+    enabled: true
+----
+
+Maven package and push to CF
+~~~~~~~
+[source,shell]
+----
+cf push
+----
